@@ -3,4 +3,4 @@ Flask-SocketIO==5.3.2           # SocketIO integration for Flask
 opencv-python==4.6.0.66         # OpenCV for image processing
 mediapipe==0.9.1                 # MediaPipe for hand tracking
 numpy==1.23.1                   # NumPy for numerical operations
-autopy==0.3.5                   # For controlling the mouse and keyboard
+autopy==4.0.0                   # For controlling the mouse and keyboard
