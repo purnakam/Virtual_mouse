@@ -3,3 +3,4 @@ Flask-SocketIO==5.3.2           # SocketIO integration for Flask
 opencv-python-headless==4.6.0.66 # OpenCV for image processing (headless version for cloud)
 mediapipe==0.9.1                 # MediaPipe for hand tracking
 numpy==1.23.1                   # NumPy for numerical operations
+gunicorn==20.1.0
