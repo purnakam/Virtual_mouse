@@ -1,0 +1,167 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Virtual Mouse with Webcam Access</title>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(120deg, #ff7e5f, #feb47b, #86a8e7, #91eae4);
+            background-size: 400% 400%;
+            animation: gradientAnimation 12s ease infinite;
+        }
+
+        @keyframes gradientAnimation {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        h1 {
+            color: #fff;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .video-container {
+            width: 640px;
+            height: 480px;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            border: 5px solid #fff;
+            margin-bottom: 20px;
+        }
+
+        #webcam {
+            width: 100%;
+            height: 100%;
+        }
+
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            border-radius: 25px;
+            border: none;
+            background-color: #4caf50;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            transition: background-color 0.3s ease-in-out;
+        }
+
+        .btn.off {
+            background-color: #ff4757;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        #status, #mouseStatus {
+            font-size: 16px;
+            color: #fff;
+            margin-top: 10px;
+        }
+
+        #mouseStatus {
+            font-size: 18px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Virtual Mouse with Webcam Access</h1>
+
+    <div class="video-container">
+        <video id="webcam" autoplay playsinline width="640" height="480"></video>
+    </div>
+
+    <div class="controls">
+        <button class="btn" id="toggleWebcam">Start Webcam</button>
+        <div id="status">Webcam is OFF.</div>
+    </div>
+
+    <div id="mouseStatus">Virtual Mouse: Not Active</div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.0/socket.io.js"></script>
+    <script>
+        const video = document.getElementById('webcam');
+        const toggleWebcamBtn = document.getElementById('toggleWebcam');
+        const status = document.getElementById('status');
+        const mouseStatus = document.getElementById('mouseStatus');
+        const socket = io();  // Initialize Socket.IO
+        let stream = null;
+        let virtualMouseActive = false;
+
+        function toggleWebcam() {
+            if (!stream) {
+                startWebcam();
+            } else {
+                stopWebcam();
+            }
+        }
+
+        function startWebcam() {
+            navigator.mediaDevices.getUserMedia({ video: true })
+                .then((mediaStream) => {
+                    stream = mediaStream;
+                    video.srcObject = stream;
+                    toggleWebcamBtn.textContent = "Stop Webcam";
+                    toggleWebcamBtn.classList.add('off');
+                    status.textContent = "Webcam is ON.";
+                    activateVirtualMouse();
+                    socket.emit('webcam_status', { status: 'started' });
+                })
+                .catch((err) => {
+                    console.error("Error accessing the webcam: " + err);
+                    status.textContent = "Webcam access denied.";
+                });
+        }
+
+        function stopWebcam() {
+            if (stream) {
+                const tracks = stream.getTracks();
+                tracks.forEach(track => track.stop());
+                video.srcObject = null;
+                stream = null;
+                toggleWebcamBtn.textContent = "Start Webcam";
+                toggleWebcamBtn.classList.remove('off');
+                status.textContent = "Webcam is OFF.";
+                deactivateVirtualMouse();
+                socket.emit('webcam_status', { status: 'stopped' });
+            }
+        }
+
+        function activateVirtualMouse() {
+            virtualMouseActive = true;
+            mouseStatus.textContent = "Virtual Mouse: Active";
+            mouseStatus.style.color = "#00ff00";  // Green for active
+        }
+
+        function deactivateVirtualMouse() {
+            virtualMouseActive = false;
+            mouseStatus.textContent = "Virtual Mouse: Not Active";
+            mouseStatus.style.color = "#ff4757";  // Red for inactive
+        }
+
+        toggleWebcamBtn.addEventListener('click', toggleWebcam);
+    </script>
+</body>
+</html>
