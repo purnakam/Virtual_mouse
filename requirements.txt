@@ -5,3 +5,4 @@ mediapipe==0.9.1
 numpy==1.23.1
 gunicorn==20.1.0
 Werkzeug==2.2.2  # Add this line to ensure compatibility
+autopy==4.0.0  
